@@ -54,14 +54,14 @@ async def main():
     clear_csv_file()
 
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
+        browser = await p.chromium.launch(headless=False)
         page = await browser.new_page()
 
-        await page.goto(TARGET_URL, timeout=60000)
+        await page.goto(TARGET_URL)
 
         await page.click("table tfoot tr.rgPager div.rgAdvPart button.rcbActionButton")
         await page.click("ul.rcbList li:last-of-type")
-        await asyncio.sleep(3)
+        await asyncio.sleep(10)
 
         headers = await get_table_headers(page)
 
