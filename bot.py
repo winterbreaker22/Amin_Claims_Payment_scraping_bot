@@ -12,6 +12,8 @@ TABLE_ROW_SELECTOR = "table#ctl00_ContentPlaceHolder1_RadGrid1_ctl00 tbody tr"
 TABLE_CELL_SELECTOR = "td"
 NEXT_PAGE_SELECTOR = "table#ctl00_ContentPlaceHolder1_RadGrid1_ctl00 tfoot tr.rgPager div.rgArrPart2 button.rgPageNext"
 
+page_number = 1
+
 def ensure_playwright_browsers():
     try:
         subprocess.run(["playwright", "install", "--with-deps"], check=True, shell=True)
@@ -52,12 +54,13 @@ def save_to_csv(data, headers, append=True):
 
 async def main():
     clear_csv_file()
+    page_number = 1
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=False)
         page = await browser.new_page()
 
-        await page.goto(TARGET_URL)
+        await page.goto(TARGET_URL, timeout=90000)
 
         await page.click("table tfoot tr.rgPager div.rgAdvPart button.rcbActionButton")
         await page.click("ul.rcbList li:last-of-type")
@@ -67,7 +70,7 @@ async def main():
 
         first_page = True
 
-        while True:
+        while page_number < 2487:
             table_data = await scrape_table(page)
 
             if first_page:
@@ -85,6 +88,7 @@ async def main():
             await asyncio.sleep(1)
             await next_button.click(force=True)
             await asyncio.sleep(2)
+            page_number = page_number + 1
 
         await browser.close()
 
