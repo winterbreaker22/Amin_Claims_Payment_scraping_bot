@@ -54,7 +54,7 @@ async def main():
     clear_csv_file()
 
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
+        browser = await p.chromium.launch(headless=True)
         page = await browser.new_page()
 
         await page.goto(TARGET_URL, timeout=60000)
@@ -76,16 +76,15 @@ async def main():
             else:
                 save_to_csv(table_data, None, append=True) 
 
-            next_button = page.locator(NEXT_PAGE_SELECTOR)
+            next_button = page.locator(NEXT_PAGE_SELECTOR)            
+            if not next_button:
+                print("✅ Scraping complete. Data saved to", CSV_FILE)
+                break
+
             await next_button.scroll_into_view_if_needed()
             await asyncio.sleep(1)
             await next_button.click(force=True)
-
-            if next_button:
-                await next_button.click()
-                await page.wait_for_load_state("domcontentloaded")
-            else:
-                break
+            await asyncio.sleep(2)
 
         await browser.close()
 
